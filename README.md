@@ -1,4 +1,5 @@
 # ops-scripts
+![GitHub](https://img.shields.io/github/license/jiangliheng/ops-scripts)
 
 ## redis
 
