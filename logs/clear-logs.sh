@@ -114,7 +114,7 @@ function clearLogs() {
   # 循环清理日志文件
   while IFS= read -r item
   do
-    rm -f ${item}
+    rm -f "${item}"
     infoLog "-- Clean up log file: [${item}]"
   done < log_files.tmp
 
