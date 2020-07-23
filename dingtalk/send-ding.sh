@@ -220,6 +220,7 @@ function main() {
   # 判断发送消息类型
   case ${MSG_TYPE} in
     markdown)
+      # 判断 @ 方式
       if [ -n "${MOBILES}" ]; then
         DING_MESSAGE=$(markdownMessage "${TITLE}" "${CONTENT}" "${MOBILES}")
       elif [ -n "${IS_AT_ALL}" ]; then

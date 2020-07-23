@@ -24,7 +24,7 @@ License          GNU General Public License
 ### 变更记录
 
 * Version 0.0.1 2020/06/08
-  * 发送钉钉消息，支持 text，markdown 两种类型消息
+   * 发送钉钉消息，支持 text，markdown 两种类型消息
 
 
 ### 概要
