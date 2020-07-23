@@ -7,7 +7,7 @@
 
 # 脚本
 
-## redis
+## [redis](redis/README.md)
 
 * ```redis-profile.sh```：Redis 环境变量脚本。
 * ```redis-tools.sh```：Redis 集群版日常运维脚本。
@@ -18,13 +18,13 @@
   * 支持正则表达式批量删除 key
   * 支持删除所有 key（生产环境慎用）
 
-## dingtalk
+## [dingtalk](dingtalk/README.md)
 
 * ```send-ding.sh```：发送钉钉消息。
   * 支持 text、markdown 两种消息类型
   * 支持 @指定人 和 @所有人
 
-## logs
+## [logs](logs/README.md)
 
 * ```clear-logs.sh```：删除 N 天前的日志。
   * 支持配置多目录清理
