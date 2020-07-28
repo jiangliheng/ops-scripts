@@ -3,7 +3,7 @@
 # HEADER
 #================================================================
 #    Filename         clear-logs.sh
-#    Revision         0.0.2
+#    Revision         0.0.3
 #    Date             2020/06/05
 #    Author           jiangliheng
 #    Email            jiang_liheng@163.com
@@ -13,6 +13,9 @@
 #    License          GNU General Public License
 #
 #================================================================
+#
+#  Version 0.0.3 2020/07/28
+#     增加 支持仅匹配目录类型，默认是查询每个文件并删除
 #
 #  Version 0.0.2 2020/07/21
 #     优化 支持正则表达式匹配日志文件
@@ -36,6 +39,7 @@
 #%       * -p <value>                 删除日志的路径，多个目录用 "," 隔开，如："/logs1,/logs2"
 #%         -d <value>                 删除 N 天前的日志文件，即保留 N 天日志，默认：7
 #%         -e <value>                 正则表达式匹配日志文件，如："*.log*"
+#%         -D                         仅匹配目录类型，默认是查询每个文件并删除，即 find 命令增加 “-type d” 参数
 #%         -t                         调试模式，控制台打印日志，不删除日志文件
 #%         --help                     帮助信息
 #%         -v, --version              版本信息
@@ -54,6 +58,9 @@
 #%       3. 清理 30 天前的匹配正则表达式的日志文件，调试模式
 #%       sh ${SCRIPT_NAME} -p /home/nacos/logs -d 30 -e "*.log*" -t
 #%
+#%       4. 清理 30 天前的日志目录，调试模式
+#%       sh ${SCRIPT_NAME} -p /home/nacos/logs -d 30 -D -t
+#%
 #================================================================
 # END_OF_HEADER
 #================================================================
@@ -63,7 +70,7 @@ SCRIPT_HEADSIZE=$(head -200 "${0}" |grep -n "^# END_OF_HEADER" | cut -f1 -d:)
 # 脚本名称
 SCRIPT_NAME="$(basename "${0}")"
 # 版本
-VERSION="0.0.1"
+VERSION="0.0.3"
 
 # 默认保留 7 天
 DAYS=7
@@ -127,9 +134,19 @@ function clearLog() {
   # 查询要清理的文件
   if [ -n "${REGULAR_EXPRESSION}" ]
   then
-    clear_log_files=$(find "${clear_log_path}" -mtime +${DAYS} -name "${REGULAR_EXPRESSION}")
+    if [ -n "${TYPE}" ]
+    then
+      clear_log_files=$(find "${clear_log_path}" -mtime +${DAYS} -name "${REGULAR_EXPRESSION}" -type d)
+    else
+      clear_log_files=$(find "${clear_log_path}" -mtime +${DAYS} -name "${REGULAR_EXPRESSION}")
+    fi
   else
-    clear_log_files=$(find "${clear_log_path}" -mtime +${DAYS})
+    if [ -n "${TYPE}" ]
+    then
+      clear_log_files=$(find "${clear_log_path}" -mtime +${DAYS} -type d)
+    else
+      clear_log_files=$(find "${clear_log_path}" -mtime +${DAYS})
+    fi
   fi
 
   # 没有找到匹配文件，记录日志
@@ -145,7 +162,7 @@ function clearLog() {
     while IFS= read -r item
     do
       # 判断调试模式，调试模式时，不删除文件
-      if [ ! -n "${TEST_MODE}" ]
+      if [ -z "${TEST_MODE}" ]
       then
         rm -rf "${item}"
       fi
@@ -219,7 +236,7 @@ then
 fi
 
 # getopt 命令行参数
-if ! ARGS=$(getopt -o vtd:e:p: --long help,version -n "${SCRIPT_NAME}" -- "$@")
+if ! ARGS=$(getopt -o vtDd:e:p: --long help,version -n "${SCRIPT_NAME}" -- "$@")
 then
   # 无效选项，则退出
   exit 1
@@ -248,8 +265,11 @@ do
 
     -t)
       TEST_MODE=true
-      shift 2
-      ;;
+      shift;;
+
+    -D)
+      TYPE=true
+      shift;;
 
     -v|--version)
       printf "%s version %s\n" "${SCRIPT_NAME}" "${VERSION}"
