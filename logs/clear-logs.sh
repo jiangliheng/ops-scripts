@@ -7,7 +7,7 @@
 #    Date             2020/06/05
 #    Author           jiangliheng
 #    Email            jiang_liheng@163.com
-#    Website          https://jiangliheng.github.io/
+#    Website          https://github.com/jiangliheng/ops-scripts
 #    Description      删除 N 天前的日志
 #    Copyright        Copyright (c) jiangliheng
 #    License          GNU General Public License

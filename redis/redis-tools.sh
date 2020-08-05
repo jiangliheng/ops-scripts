@@ -7,7 +7,7 @@
 #    Date             2020/04/26
 #    Author           jiangliheng
 #    Email            jiang_liheng@163.com
-#    Website          https://jiangliheng.github.io/
+#    Website          https://github.com/jiangliheng/ops-scripts
 #    Description      Redis 日常运维脚本
 #    Copyright        Copyright (c) jiangliheng
 #    License          GNU General Public License
