@@ -67,5 +67,5 @@ sh clear-logs.sh -p /home/nacos/logs -d 30
 sh clear-logs.sh -p /home/nacos/logs -d 30 -e "*.log*" -t
 
 4. 清理 30 天前的日志目录，调试模式
-sh ${SCRIPT_NAME} -p /home/nacos/logs -d 30 -D -t
+sh clear-logs.sh -p /home/nacos/logs -d 30 -D -t
 ```
