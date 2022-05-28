@@ -10,7 +10,7 @@
 ## [redis](redis/README.md)
 
 * ```redis-profile.sh```：Redis 环境变量脚本。
-* ```redis-tools.sh```：Redis 集群版日常运维脚本。
+* ```redis-tools.sh```：Redis 单机/集群版日常运维脚本。
   * 支持集群命令简单查询，如：nodes, info
   * 支持正则表达式模糊查询 key（keys 命令查询，生产环境慎用，建议使用：scan 命令）
   * 支持获取指定 key 的值
