@@ -25,7 +25,7 @@ $ redis-cli -v
 ### 简介
 ```
 Filename         redis-tools.sh
-Revision         0.0.2
+Revision         0.0.3
 Date             2020/04/26
 Author           jiangliheng
 Email            jiang_liheng@163.com
@@ -37,11 +37,13 @@ License          GNU General Public License
 
 ### 变更记录
 
+* Version 0.0.3 2022/05/28
+   * 增加 支持 Redis 单节点 key 查询、key 删除等功能
+
 * Version 0.0.2 2020/05/16
    * 修正 inputYN 多次回车，导致参数丢失问题
    * 修正 部分描述信息，调整格式等
    * 增加 “批量删除相同前缀的 key，支持正则表达式” 方法
-
 
 * Version 0.0.1 2020/04/26
    * 创建 Redis 集群情况查询、key 查询、key 删除等功能脚本
@@ -58,6 +60,7 @@ redis-tools.sh [options] <value> ...
 -h<value>, --host=<value>            Redis IP，可设置默认值参数：HOST
 -p<value>, --port=<value>            Redis 端口，可设置默认值参数：PORT
 -a<value>, --password=<value>        Redis 密码，可设置默认值参数：PASSWORD
+-n<value>, --number=<value>          单节点时,指定连接的数据库,如：0~15
 -c<value>, --cluster=<value>         集群相关命令，如：nodes, info
 -k<pattern>, --keys=<pattern>        查询 key，支持正则表达式
 -g<value>, --get=<value>             获取指定 key 的值
@@ -83,16 +86,22 @@ sh redis-tools.sh -h 127.0.0.1 -p 8001 -a password -c nodes
 3. 查询 key，支持正则表达式
 sh redis-tools.sh -k "party::123"
 sh redis-tools.sh -k "party*"
+sh redis-tools.sh -n 10 -k "party::123"
+sh redis-tools.sh -n 10 -k "party*"
 
 4. 获取指定 key 值
 sh redis-tools.sh -g "party::123"
+sh redis-tools.sh -n 10 -g "party::123"
 
 5. 删除指定 key，不支持正则表达式，原因：redis 的 del 命令不支持正则表达式
 sh redis-tools.sh -d "party::123"
+sh redis-tools.sh -n 10 -d "party::123"
 
 6. 批量删除 key，支持正则表达式
 sh redis-tools.sh -b "party::123"
 sh redis-tools.sh -b "party*"
+sh redis-tools.sh -n 10 -b "party::123"
+sh redis-tools.sh -n 10 -b "party*"
 
 7. 删除所有 key
 sh redis-tools.sh -f

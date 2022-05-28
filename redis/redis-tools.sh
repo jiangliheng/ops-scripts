@@ -3,7 +3,7 @@
 # HEADER
 #================================================================
 #    Filename         redis-tools.sh
-#    Revision         0.0.2
+#    Revision         0.0.3
 #    Date             2020/04/26
 #    Author           jiangliheng
 #    Email            jiang_liheng@163.com
@@ -13,6 +13,9 @@
 #    License          GNU General Public License
 #
 #================================================================
+# Version 0.0.3 2022/05/28
+#     增加 支持 Redis 单节点 key 查询、key 删除等功能
+#
 #  Version 0.0.2 2020/05/16
 #     修正 inputYN 多次回车，导致参数丢失问题
 #     修正 部分描述信息，调整格式等
@@ -35,6 +38,7 @@
 #%       -h<value>, --host=<value>            Redis IP，可设置默认值参数：HOST
 #%       -p<value>, --port=<value>            Redis 端口，可设置默认值参数：PORT
 #%       -a<value>, --password=<value>        Redis 密码，可设置默认值参数：PASSWORD
+#%       -n<value>, --number=<value>          单节点时,指定连接的数据库,如：0~15
 #%       -c<value>, --cluster=<value>         集群相关命令，如：nodes, info
 #%       -k<pattern>, --keys=<pattern>        查询 key，支持正则表达式
 #%       -g<value>, --get=<value>             获取指定 key 的值
@@ -58,16 +62,22 @@
 #%       3. 查询 key，支持正则表达式
 #%       sh ${SCRIPT_NAME} -k "party::123"
 #%       sh ${SCRIPT_NAME} -k "party*"
+#%       sh redis-tools.sh -n 10 -k "party::123"
+#%       sh redis-tools.sh -n 10 -k "party*"
 #%
 #%       4. 获取指定 key 值
 #%       sh ${SCRIPT_NAME} -g "party::123"
+#%       sh redis-tools.sh -n 10 -g "party::123"
 #%
 #%       5. 删除指定 key，不支持正则表达式，原因：redis 的 del 命令不支持正则表达式
 #%       sh ${SCRIPT_NAME} -d "party::123"
+#%       sh ${SCRIPT_NAME} -n 10 -d "party::123"
 #%
 #%       6. 批量删除 key，支持正则表达式
 #%       sh ${SCRIPT_NAME} -b "party::123"
 #%       sh ${SCRIPT_NAME} -b "party*"
+#%       sh ${SCRIPT_NAME} -n 10 -b "party::123"
+#%       sh ${SCRIPT_NAME} -n 10 -b "party*"
 #%
 #%       7. 删除所有 key
 #%       sh ${SCRIPT_NAME} -f
@@ -81,7 +91,7 @@ SCRIPT_HEADSIZE=$(head -200 "${0}" |grep -n "^# END_OF_HEADER" | cut -f1 -d:)
 # 脚本名称
 SCRIPT_NAME="$(basename "${0}")"
 # 版本
-VERSION="0.0.2"
+VERSION="0.0.3"
 
 # 默认 host
 HOST=127.0.0.1
@@ -89,6 +99,8 @@ HOST=127.0.0.1
 PORT=8001
 # 默认 password
 PASSWORD=password
+# 默认选择 0 库
+DATABASE=0
 
 # usage
 usage() {
@@ -99,19 +111,23 @@ usage() {
 
 # redis-cli 方法
 cli() {
-  printf "\033[36mredis-cli -c -h %s -p %s -a %s %s \"%s\" \033[0m\n\n" "${HOST}" "${PORT}" "${PASSWORD}" "$1" "$2"
-  eval redis-cli -c -h "${HOST}" -p "${PORT}" -a "${PASSWORD}" "$1" \""$2"\"
+  printf "\033[36mredis-cli -c -h %s -p %s -a %s -n %s %s \"%s\" \033[0m\n\n" "${HOST}" "${PORT}" "${PASSWORD}" "${DATABASE}" "$1" "$2"
+  eval redis-cli -c -h "${HOST}" -p "${PORT}" -a "${PASSWORD}" -n "${DATABASE}" "$1" \""$2"\"
 }
 
 # clusterCli 方法
 clusterCli() {
-  printf "\033[36mredis-cli -c -h %s -p %s -a %s cluster %s \033[0m\n\n" "${HOST}" "${PORT}" "${PASSWORD}" "$1"
-  eval redis-cli -c -h "${HOST}" -p "${PORT}" -a "${PASSWORD}" cluster "$1"
+  printf "\033[36mredis-cli -c -h %s -p %s -a %s -n %s cluster %s \033[0m\n\n" "${HOST}" "${PORT}" "${PASSWORD}" "${DATABASE}" "$1"
+  eval redis-cli -c -h "${HOST}" -p "${PORT}" -a "${PASSWORD}" -n "${DATABASE}" cluster "$1"
 }
 
 # 查询 master 节点
 masterNodes() {
   masterNodes=$(clusterCli nodes | awk '{if($3=="master" || $3=="myself,master") print $2}' | awk -F@ '{print $1}')
+  if [[ "X${masterNodes}" == "X"  ]];
+  then
+    masterNodes="${HOST}:${PORT}"
+  fi
   printf "\033[36mRedis master nodes: \n%s\n\033[0m" "${masterNodes}"
 }
 
@@ -124,8 +140,8 @@ flushallCli() {
   do
     thost=${master%:*}
     tport=${master#*:}
-    printf "\033[36m\nredis-cli -c -h %s -p %s -a %s flushall \033[0m\n" "${thost}" "${tport}" "${PASSWORD}"
-    eval redis-cli -c -h "${thost}" -p "${tport}" -a "${PASSWORD}" flushall
+    printf "\033[36m\nredis-cli -c -h %s -p %s -a %s -n %s flushall \033[0m\n" "${thost}" "${tport}" "${PASSWORD}" "${DATABASE}"
+    eval redis-cli -c -h "${thost}" -p "${tport}" -a "${PASSWORD}" -n "${DATABASE}" flushall
   done
 }
 
@@ -138,8 +154,8 @@ keysCli() {
   do
     thost=${master%:*}
     tport=${master#*:}
-    printf "\033[36m\nredis-cli -c -h %s -p %s -a %s keys \"%s\" \033[0m\n" "${thost}" "${tport}" "${PASSWORD}" "$1"
-    eval redis-cli -c -h "${thost}" -p "${tport}" -a "${PASSWORD}" keys \""$1"\"
+    printf "\033[36m\nredis-cli -c -h %s -p %s -a %s -n %s keys \"%s\" \033[0m\n" "${thost}" "${tport}" "${PASSWORD}" "${DATABASE}" "$1"
+    eval redis-cli -c -h "${thost}" -p "${tport}" -a "${PASSWORD}" -n "${DATABASE}" keys \""$1"\"
   done
 }
 
@@ -152,8 +168,8 @@ bdelCli() {
   do
     thost=${master%:*}
     tport=${master#*:}
-    printf "\033[36m\nredis-cli -h %s -p %s -a %s --scan --pattern \"%s\" | xargs -L 1 redis-cli -h %s -p %s -a %s del\033[0m\n" "${thost}" "${tport}" "${PASSWORD}" "$1" "${thost}" "${tport}" "${PASSWORD}"
-    eval redis-cli -h "${thost}" -p "${tport}" -a "${PASSWORD}" --scan --pattern \""$1"\" | xargs -L 1 redis-cli -h "${thost}" -p "${tport}" -a "${PASSWORD}" del
+    printf "\033[36m\nredis-cli -h %s -p %s -a %s -n %s --scan --pattern \"%s\" | xargs -L 1 redis-cli -h %s -p %s -a %s -n %s del\033[0m\n" "${thost}" "${tport}" "${PASSWORD}" "$1" "${thost}" "${tport}" "${PASSWORD}" "${DATABASE}"
+    eval redis-cli -h "${thost}" -p "${tport}" -a "${PASSWORD}" -n "${DATABASE}" --scan --pattern \""$1"\" | xargs -L 1 redis-cli -h "${thost}" -p "${tport}" -a "${PASSWORD}" -n "${DATABASE}" del
   done
 }
 
@@ -183,7 +199,7 @@ then
 fi
 
 # getopt 命令行参数
-if ! ARGS=$(getopt -o vfh:p:a:g:d:c:k:b: --long flushall,help,version,host:,port:,password:,get:,del:,bdel:,password:,cluster:,keys: -n "${SCRIPT_NAME}" -- "$@")
+if ! ARGS=$(getopt -o vfh:p:n:a:g:d:c:k:b: --long flushall,help,version,host:,port:,number:,password:,get:,del:,bdel:,password:,cluster:,keys: -n "${SCRIPT_NAME}" -- "$@")
 then
   # 无效选项，则退出
   exit 1
@@ -207,6 +223,11 @@ do
 
     -p|--port)
       PORT="$2"
+      shift 2
+      ;;
+
+    -n|--number)
+      DATABASE="$2"
       shift 2
       ;;
 
