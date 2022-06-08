@@ -114,14 +114,14 @@ usage() {
 
 # redis-cli 方法
 cli() {
-  printf "\033[36mredis-cli -c -h %s -p %s -a %s -n %s %s \"%s\" \033[0m\n\n" "${HOST}" "${PORT}" "'${PASSWORD}'" "${DATABASE}" "$1" "$2"
-  eval redis-cli -c -h "${HOST}" -p "${PORT}" -a "'${PASSWORD}'" -n "${DATABASE}" "$1" \""$2"\"
+  printf "\033[36mredis-cli -c -h %s -p %s -a %s -n %s %s \"%s\" \033[0m\n\n" "${HOST}" "${PORT}" \"${PASSWORD}\" "${DATABASE}" "$1" "$2"
+  eval redis-cli -c -h "${HOST}" -p "${PORT}" -a \"${PASSWORD}\" -n "${DATABASE}" "$1" \""$2"\"
 }
 
 # clusterCli 方法
 clusterCli() {
-  printf "\033[36mredis-cli -c -h %s -p %s -a %s -n %s cluster %s \033[0m\n\n" "${HOST}" "${PORT}" "'${PASSWORD}'" "${DATABASE}" "$1"
-  eval redis-cli -c -h "${HOST}" -p "${PORT}" -a "'${PASSWORD}'" -n "${DATABASE}" cluster "$1"
+  printf "\033[36mredis-cli -c -h %s -p %s -a %s -n %s cluster %s \033[0m\n\n" "${HOST}" "${PORT}" \"${PASSWORD}\" "${DATABASE}" "$1"
+  eval redis-cli -c -h "${HOST}" -p "${PORT}" -a \"${PASSWORD}\" -n "${DATABASE}" cluster "$1"
 }
 
 # 查询 master 节点
@@ -143,8 +143,8 @@ flushallCli() {
   do
     thost=${master%:*}
     tport=${master#*:}
-    printf "\033[36m\nredis-cli -c -h %s -p %s -a %s -n %s flushall \033[0m\n" "${thost}" "${tport}" "'${PASSWORD}'" "${DATABASE}"
-    eval redis-cli -c -h "${thost}" -p "${tport}" -a "'${PASSWORD}'" -n "${DATABASE}" flushall
+    printf "\033[36m\nredis-cli -c -h %s -p %s -a %s -n %s flushall \033[0m\n" "${thost}" "${tport}" \"${PASSWORD}\" "${DATABASE}"
+    eval redis-cli -c -h "${thost}" -p "${tport}" -a \"${PASSWORD}\" -n "${DATABASE}" flushall
   done
 }
 
@@ -157,8 +157,8 @@ keysCli() {
   do
     thost=${master%:*}
     tport=${master#*:}
-    printf "\033[36m\nredis-cli -c -h %s -p %s -a %s -n %s keys \"%s\" \033[0m\n" "${thost}" "${tport}" "'${PASSWORD}'" "${DATABASE}" "$1"
-    eval redis-cli -c -h "${thost}" -p "${tport}" -a "'${PASSWORD}'" -n "${DATABASE}" keys \""$1"\"
+    printf "\033[36m\nredis-cli -c -h %s -p %s -a %s -n %s keys \"%s\" \033[0m\n" "${thost}" "${tport}" \"${PASSWORD}\" "${DATABASE}" "$1"
+    eval redis-cli -c -h "${thost}" -p "${tport}" -a \"${PASSWORD}\" -n "${DATABASE}" keys \""$1"\"
   done
 }
 
@@ -171,8 +171,8 @@ bdelCli() {
   do
     thost=${master%:*}
     tport=${master#*:}
-    printf "\033[36m\nredis-cli -h %s -p %s -a %s -n %s --scan --pattern \"%s\" | xargs -L 1 redis-cli -h %s -p %s -a %s -n %s del\033[0m\n" "${thost}" "${tport}" "'${PASSWORD}'" "$1" "${thost}" "${tport}" "'${PASSWORD}'" "${DATABASE}"
-    eval redis-cli -h "${thost}" -p "${tport}" -a "'${PASSWORD}'" -n "${DATABASE}" --scan --pattern \""$1"\" | xargs -L 1 redis-cli -h "${thost}" -p "${tport}" -a "'${PASSWORD}'" -n "${DATABASE}" del
+    printf "\033[36m\nredis-cli -h %s -p %s -a %s -n %s --scan --pattern \"%s\" | xargs -L 1 redis-cli -h %s -p %s -a %s -n %s del\033[0m\n" "${thost}" "${tport}" \"${PASSWORD}\" "${DATABASE}" "$1" "${thost}" "${tport}" \"${PASSWORD}\" "${DATABASE}"
+    eval redis-cli -h "${thost}" -p "${tport}" -a \"${PASSWORD}\" -n "${DATABASE}" --scan --pattern \""$1"\" | xargs -L 1 redis-cli -h "${thost}" -p "${tport}" -a \"${PASSWORD}\" -n "${DATABASE}" del
   done
 }
 
