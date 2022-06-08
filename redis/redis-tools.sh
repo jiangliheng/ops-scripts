@@ -172,7 +172,7 @@ bdelCli() {
     thost=${master%:*}
     tport=${master#*:}
     printf "\033[36m\nredis-cli -h %s -p %s -a %s -n %s --scan --pattern \"%s\" | xargs -L 1 redis-cli -h %s -p %s -a %s -n %s del\033[0m\n" "${thost}" "${tport}" \"${PASSWORD}\" "${DATABASE}" "$1" "${thost}" "${tport}" \"${PASSWORD}\" "${DATABASE}"
-    eval redis-cli -h "${thost}" -p "${tport}" -a \"${PASSWORD}\" -n "${DATABASE}" --scan --pattern \""$1"\" | xargs -L 1 redis-cli -h "${thost}" -p "${tport}" -a \"${PASSWORD}\" -n "${DATABASE}" del
+    eval redis-cli -h "${thost}" -p "${tport}" -a \"${PASSWORD}\" -n "${DATABASE}" --scan --pattern \""$1"\" | xargs -L 1 redis-cli -h "${thost}" -p "${tport}" -a "${PASSWORD}" -n "${DATABASE}" del
   done
 }
 
