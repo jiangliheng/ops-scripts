@@ -37,6 +37,9 @@ License          GNU General Public License
 
 ### 变更记录
 
+* Version 0.0.4 2022/06/08
+   * 修正 解决Redis密码存在特殊字符的问题
+
 * Version 0.0.3 2022/05/28
    * 增加 支持 Redis 单节点 key 查询、key 删除等功能
 
